@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "google/protobuf/descriptor.proto";
+
+package faceit.backstage.custom_options;
+
+option go_package = "github.com/faceit/protoc-gen-backstage/custom_options";
+
+
+extend google.protobuf.ServiceOptions {
+  optional string owner = 51001;
+  optional string system = 51002;
+}
