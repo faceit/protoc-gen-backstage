@@ -51,18 +51,18 @@ func (p *plugin) Generate(req *plugin_go.CodeGeneratorRequest) (*plugin_go.CodeG
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
-	name: ` + strings.Replace(service.FullName, ".", "-", -1) + `
+  name: ` + strings.Replace(service.FullName, ".", "-", -1) + `
 spec:
-	type: grpc
-	owner: ` + owner
+  type: grpc
+  owner: ` + owner
 					if system != "" {
-						content += `    
+						content += `
   system: " + system
 `
 					}
 					content += `
 definition:
-	$text: /proto/` + descriptor.GetName() + `
+  $text: /proto/` + descriptor.GetName() + `
 `
 				}
 			}
