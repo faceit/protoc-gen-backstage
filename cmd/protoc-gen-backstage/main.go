@@ -9,7 +9,7 @@ import (
 	"github.com/pseudomuto/protokit"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/faceit/protoc-gen-backstage/proto/gen/github.com/faceit/protoc-gen-backstage/custom_options"
+	"github.com/faceit/protoc-gen-backstage/proto/gen/github.com/faceit/protoc-gen-backstage/efg/backstage"
 )
 
 func main() {
@@ -38,8 +38,8 @@ func (p *plugin) Generate(req *plugin_go.CodeGeneratorRequest) (*plugin_go.CodeG
 		if len(descriptor.Services) > 0 {
 			for _, service := range descriptor.Services {
 				options := service.ServiceDescriptorProto.Options
-				owner := proto.GetExtension(options, custom_options.E_Owner).(string)
-				system := proto.GetExtension(options, custom_options.E_System).(string)
+				owner := proto.GetExtension(options, backstage.E_Owner).(string)
+				system := proto.GetExtension(options, backstage.E_System).(string)
 				if owner == "" {
 					content += `
 # Owner is a required field your Service "` + service.FullName + `" must implement the custom option
