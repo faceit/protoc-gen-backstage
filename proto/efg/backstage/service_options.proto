@@ -2,9 +2,9 @@ syntax = "proto3";
 
 import "google/protobuf/descriptor.proto";
 
-package efg.backstage.custom_options;
+package efg.backstage;
 
-option go_package = "github.com/faceit/protoc-gen-backstage/custom_options";
+option go_package = "github.com/faceit/protoc-gen-backstage/efg/backstage";
 
 
 extend google.protobuf.ServiceOptions {
