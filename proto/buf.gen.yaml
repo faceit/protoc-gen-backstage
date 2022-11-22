@@ -1,4 +1,6 @@
 version: v1
 plugins:
   - name: go
-    out: gen/
+    out: gen/go
+  - name: java
+    out: gen/java
