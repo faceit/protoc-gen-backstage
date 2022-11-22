@@ -40,6 +40,13 @@ func (p *plugin) Generate(req *plugin_go.CodeGeneratorRequest) (*plugin_go.CodeG
 				options := service.ServiceDescriptorProto.Options
 				owner := proto.GetExtension(options, backstage.E_Owner).(string)
 				system := proto.GetExtension(options, backstage.E_System).(string)
+
+				var lifecycle = "production"
+				deprecated := options.GetDeprecated()
+				if deprecated {
+					lifecycle = "deprecated"
+				}
+
 				if owner == "" {
 					content += `
 # Owner is a required field your Service "` + service.FullName + `" must implement the custom option
@@ -54,6 +61,8 @@ metadata:
   name: ` + strings.Replace(service.FullName, ".", "-", -1) + `
 spec:
   type: grpc
+  lifecycle: ` + lifecycle +
+						`
   owner: ` + owner
 					if system != "" {
 						content += `
