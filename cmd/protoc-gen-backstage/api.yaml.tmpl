@@ -1,0 +1,26 @@
+{{- if .Owner }}
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: {{ .Name }}
+{{- if gt (len .Annotations) 0 }}
+  annotations:
+    {{ range .Annotations }}
+      {{ .Key }}: {{.Value}}
+    {{ end }}
+{{- end}}
+spec:
+  type: grpc
+  lifecycle: {{ .Lifecycle }}
+  owner: {{ .Owner}}
+{{- if .System }}
+  system: {{ .System }}
+{{- end }}
+  definition:
+    $text: {{ .DefinitionLocation}}
+{{- else }}
+# Owner is a required field
+# Your Service {{ .FullName }} must implement the custom option
+# See github.com/faceit/protoc-gen-backstage for more info TEST
+{{- end }}

@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"embed"
 	"fmt"
 	"log"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"text/template"
 
 	"github.com/golang/protobuf/protoc-gen-go/plugin"
 	"github.com/pseudomuto/protokit"
@@ -13,6 +16,9 @@ import (
 
 	"github.com/faceit/protoc-gen-backstage/proto/gen/go/github.com/faceit/protoc-gen-backstage/efg/backstage"
 )
+
+//go:embed api.yaml.tmpl
+var apiTemplate embed.FS
 
 func main() {
 	if err := protokit.RunPlugin(&plugin{}); err != nil {
@@ -25,6 +31,20 @@ type plugin struct{}
 type PluginOptions struct {
 	OutputFile string
 	Root       string
+}
+
+type API struct {
+	Name               string
+	FullName           string
+	Owner              string
+	Annotations        []*Annotation
+	Lifecycle          string
+	System             string
+	DefinitionLocation string
+}
+type Annotation struct {
+	Key   string
+	Value string
 }
 
 func (p *plugin) Generate(req *plugin_go.CodeGeneratorRequest) (*plugin_go.CodeGeneratorResponse, error) {
@@ -41,6 +61,7 @@ func (p *plugin) Generate(req *plugin_go.CodeGeneratorRequest) (*plugin_go.CodeG
 		if len(descriptor.Services) > 0 {
 			for _, service := range descriptor.Services {
 				serviceOptions := service.ServiceDescriptorProto.Options
+
 				owner := proto.GetExtension(serviceOptions, backstage.E_Owner).(string)
 				system := proto.GetExtension(serviceOptions, backstage.E_System).(string)
 
@@ -49,48 +70,32 @@ func (p *plugin) Generate(req *plugin_go.CodeGeneratorRequest) (*plugin_go.CodeG
 				if deprecated {
 					lifecycle = "deprecated"
 				}
+				var annotations []*Annotation
 
-				var nameTooLong = false
 				name := strings.Replace(service.FullName, ".", "-", -1)
 				if len(name) > 63 {
-					nameTooLong = true
 					name = truncateTo63Chars(name)
+					nameTooLongAnnotation := &Annotation{
+						Key:   "originalName",
+						Value: service.FullName,
+					}
+					annotations = append(annotations, nameTooLongAnnotation)
 				}
 
-				if owner == "" {
-					content += `
-# Owner is a required field your Service "` + service.FullName + `" must implement the custom option
-# See github.com/faceit/protoc-gen-backstage for more info
-`
-				} else {
-					content += `
----
-apiVersion: backstage.io/v1alpha1
-kind: API
-metadata:
-  name: ` + name
-					if nameTooLong {
-						content += `
-  annotations:
-    originalName: ` + service.FullName
-					}
-					content += `
-spec:
-  type: grpc
-  lifecycle: ` + lifecycle +
-						`
-  owner: ` + owner
-
-					if system != "" {
-						content += `
-  system: " + system
-`
-					}
-					content += `
-  definition:
-    $text: ` + options.Root + "/" + descriptor.GetName() + `
-`
+				api := &API{
+					Name:               name,
+					FullName:           service.FullName,
+					Annotations:        annotations,
+					Lifecycle:          lifecycle,
+					Owner:              owner,
+					System:             system,
+					DefinitionLocation: options.Root + "/" + descriptor.GetName(),
 				}
+
+				buffer := new(bytes.Buffer)
+				t := template.Must(template.ParseFS(apiTemplate, "*"))
+				err = t.Execute(buffer, api)
+				content += buffer.String()
 			}
 
 			dir := strings.Split(descriptor.GetName(), ".")[0] + "/"
