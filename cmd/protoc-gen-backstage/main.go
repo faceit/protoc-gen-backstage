@@ -61,8 +61,8 @@ spec:
 `
 					}
 					content += `
-definition:
-  $text: /proto/` + descriptor.GetName() + `
+  definition:
+    $text: /proto/` + descriptor.GetName() + `
 `
 				}
 			}
