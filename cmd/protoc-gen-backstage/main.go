@@ -11,7 +11,7 @@ import (
 	"github.com/pseudomuto/protokit"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/faceit/protoc-gen-backstage/proto/gen/github.com/faceit/protoc-gen-backstage/efg/backstage"
+	"github.com/faceit/protoc-gen-backstage/proto/gen/go/github.com/faceit/protoc-gen-backstage/efg/backstage"
 )
 
 func main() {
