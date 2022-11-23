@@ -6,9 +6,9 @@ metadata:
   name: {{ .Name }}
 {{- if gt (len .Annotations) 0 }}
   annotations:
-    {{ range .Annotations }}
+    {{- range .Annotations }}
       {{ .Key }}: {{.Value}}
-    {{ end }}
+    {{- end }}
 {{- end}}
 spec:
   type: grpc
