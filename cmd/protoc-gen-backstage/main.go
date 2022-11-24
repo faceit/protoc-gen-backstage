@@ -29,8 +29,9 @@ func main() {
 type plugin struct{}
 
 type PluginOptions struct {
-	OutputFile string
-	Root       string
+	OutputFileName    string
+	URLRoot           string
+	RegexNameTemplate *regexp.Regexp
 }
 
 type API struct {
@@ -72,7 +73,8 @@ func (p *plugin) Generate(req *plugin_go.CodeGeneratorRequest) (*plugin_go.CodeG
 				}
 				var annotations []*Annotation
 
-				name := strings.Replace(service.FullName, ".", "-", -1)
+				name := regexTemplateName(service.FullName, options.RegexNameTemplate)
+				name = strings.Replace(name, ".", "-", -1)
 				if len(name) > 63 {
 					name = truncateTo63Chars(name)
 					nameTooLongAnnotation := &Annotation{
@@ -89,7 +91,7 @@ func (p *plugin) Generate(req *plugin_go.CodeGeneratorRequest) (*plugin_go.CodeG
 					Lifecycle:          lifecycle,
 					Owner:              owner,
 					System:             system,
-					DefinitionLocation: options.Root + "/" + descriptor.GetName(),
+					DefinitionLocation: options.URLRoot + "/" + descriptor.GetName(),
 				}
 
 				buffer := new(bytes.Buffer)
@@ -101,7 +103,7 @@ func (p *plugin) Generate(req *plugin_go.CodeGeneratorRequest) (*plugin_go.CodeG
 			dir := strings.Split(descriptor.GetName(), ".")[0] + "/"
 
 			resp.File = append(resp.File, &plugin_go.CodeGeneratorResponse_File{
-				Name:    proto.String(filepath.Join(dir, options.OutputFile)),
+				Name:    proto.String(filepath.Join(dir, options.OutputFileName)),
 				Content: proto.String(content),
 			})
 		}
@@ -116,28 +118,49 @@ func truncateTo63Chars(name string) string {
 	return name
 }
 
+func regexTemplateName(name string, regex *regexp.Regexp) string {
+	matches := regex.FindStringSubmatch(name)
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("regex didn't match service", name)
+		}
+	}()
+	templatedName := strings.Join(matches[1:], "")
+	return templatedName
+}
+
 func ParseOptions(req *plugin_go.CodeGeneratorRequest) (*PluginOptions, error) {
-	options := &PluginOptions{OutputFile: "catalog-info.yaml"}
+	options := &PluginOptions{
+		OutputFileName:    "catalog-info.yaml",
+		RegexNameTemplate: regexp.MustCompile("(.*)"),
+	}
 
 	params := req.GetParameter()
 
 	if params == "" {
 		return nil, fmt.Errorf("must provide root dir option")
-
 	}
 
 	parts := strings.Split(params, ",")
-	if len(parts) < 1 || len(parts) > 2 {
-		return nil, fmt.Errorf("invalid parameter: %s", params)
+	if len(parts) < 1 || len(parts) > 3 {
+		return nil, fmt.Errorf("invalid parameter: %s, must be 1-3 options", params)
 	}
 
 	if parts[0] == "" {
-		return nil, fmt.Errorf("must provide root dir")
+		return nil, fmt.Errorf("must provide root dir option")
 	}
-	options.Root = parts[0]
+	options.URLRoot = parts[0]
 
-	if parts[1] != "" {
-		options.OutputFile = parts[1]
+	if len(parts) > 1 && parts[1] != "" {
+		options.OutputFileName = parts[1]
+	}
+
+	if len(parts) > 2 && parts[2] != "" {
+		regexNameTemplate, err := regexp.Compile(parts[2])
+		if err != nil {
+			return nil, fmt.Errorf("third option must be regex")
+		}
+		options.RegexNameTemplate = regexNameTemplate
 	}
 
 	return options, nil
