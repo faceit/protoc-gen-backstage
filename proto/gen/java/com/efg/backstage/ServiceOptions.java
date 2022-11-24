@@ -52,10 +52,10 @@ public final class ServiceOptions {
       ".proto::\n\005owner\022\037.google.protobuf.Servic" +
       "eOptions\030\271\216\003 \001(\tR\005owner\210\001\001:<\n\006system\022\037.g" +
       "oogle.protobuf.ServiceOptions\030\272\216\003 \001(\tR\006s" +
-      "ystem\210\001\001Bm\n\021com.efg.backstageZXgithub.co" +
+      "ystem\210\001\001Bj\n\021com.efg.backstageZUgithub.co" +
       "m/faceit/protoc-gen-backstage/proto/efg/" +
-      "backstage/proto/gen/go/go/efg/backstageb" +
-      "\006proto3"
+      "backstage/proto/gen/go/efg/backstageb\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
