@@ -8,4 +8,8 @@ This is a protoc plugin to allow you to generate backstage API kinds from your p
 
 ### Owner Field
 
-The `spec.owner`  field in backstage is required so we have provided a service option extension to be used in your proto definitions
+The `spec.owner`  field in backstage is required, so we have provided a service option extension to be used in your proto definitions
+
+### System Field
+
+The `system` field in backstage is optional but is provided by this package so that it can populated from a proto service

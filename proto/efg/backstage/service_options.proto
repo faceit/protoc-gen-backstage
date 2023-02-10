@@ -9,8 +9,8 @@ option go_package = "github.com/faceit/protoc-gen-backstage/proto/gen/go/efg/bac
 option java_package = "com.efg.backstage";
 
 extend google.protobuf.ServiceOptions {
-  // Used to fill the spec.owner field in backstage file
+  // Used to fill the spec.owner field in a backstage file
   optional string owner = 51001;
-  // Used to fill the system field in backstage file
+  // Used to fill the system field in a backstage file
   optional string system = 51002;
 }
