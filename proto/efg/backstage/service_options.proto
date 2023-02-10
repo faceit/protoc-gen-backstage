@@ -1,3 +1,4 @@
+// this proto is from https://github.com/faceit/protoc-gen-backstage
 syntax = "proto3";
 
 import "google/protobuf/descriptor.proto";
@@ -8,6 +9,8 @@ option go_package = "github.com/faceit/protoc-gen-backstage/proto/gen/go/efg/bac
 option java_package = "com.efg.backstage";
 
 extend google.protobuf.ServiceOptions {
+  // Used to fill the spec.owner field in backstage file
   optional string owner = 51001;
+  // Used to fill the system field in backstage file
   optional string system = 51002;
 }
